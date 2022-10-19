@@ -1,0 +1,178 @@
+<!doctype html>
+<style>
+    .divBody {
+        height: 100%;
+        width: 100%;
+        margin: auto;
+    }
+
+    .divScreenChat {
+        overflow: auto;
+        position: absolute;
+        bottom: 0px;
+        left: 30%;
+        right: 30%;
+        top: 0px;
+        border-top: 1px solid #dfdfdf80;
+        background-color: white;
+    }
+
+    .divChat {
+        overflow: auto;
+        position: absolute;
+        bottom: 80px;
+        left: 0%;
+        right: 0%;
+        top: 70px;
+        border-top: 1px solid #dfdfdf80;
+        background-color: aliceblue;
+        scroll-behavior: smooth;
+        overflow-y: hidden;
+    }
+
+    .divBottom {
+        position: absolute;
+        bottom: 30px;
+        left: 0%;
+        right: 0%;
+    }
+
+    #output>p {
+        overflow-wrap: break-word;
+        margin-top: 30px;
+    }
+
+    #output p.left {
+        text-align: left;
+    }
+
+    #output p.right {
+        text-align: right;
+    }
+
+    #output span {
+        color: black;
+    }
+
+    #output span.error {
+        color: red;
+    }
+
+    #output span.send {
+        color: black;
+        background-color: white;
+        padding: 10px;
+        border-top-left-radius: 15px;
+        border-bottom-left-radius: 15px;
+        border-bottom-right-radius: 15px;
+        max-width: 80%;
+        margin-right: 24px;
+    }
+
+    #output span.response {
+        color: white;
+        background-color: #292D8F;
+        padding: 10px;
+        border-top-right-radius: 15px;
+        border-bottom-left-radius: 15px;
+        border-bottom-right-radius: 15px;
+        align-items: flex-end;
+        max-width: 80%;
+        margin-left: 24px;
+    }
+
+    .sendIcon {
+        width: 24px;
+        height: 24px;
+        padding: 8px;
+        border-radius: 500px;
+        background-color: aliceblue;
+        box-shadow: 2px 3px #c5c1c1;
+    }
+</style>
+
+<body style="background-color: white;">
+    <div class="divBody">
+        <div class="divScreenChat">
+            <div style="display: flex; justify-content: center;">
+                <h2 style="text-align: center;">Trippy</h2>
+                
+                <div style="position: absolute; right: 16px; top: 1%; bottom: 2%; background-color: aliceblue; border-radius: 50px; width: 24px; height: 24px; padding: 8px;">
+                    <img src="images/account.png" width="100%" height="100%">
+                </div>
+            </div>
+
+            <div id="chat" class="divChat">
+                <div id=output></div>
+            </div>
+
+            <div class="divBottom" style="display: flex;">
+                <div style="width: 85%; border-radius: 50px; box-shadow: 2px 3px #c5c1c1; text-align: center; ">
+                    <input
+                        style="height: 85%; width: 90%; border-radius: 50px; border: none; outline: none; margin-left: 15px; "
+                        placeholder="Escribe algo..."></input>
+                </div>
+
+                <div id="buttonSend" style="width: 15%;">
+                    <div class="sendIcon" style="text-align: center; margin: auto;">
+                        <img src="images/send.png" width="100%" height="100%">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    // http://www.websocket.org/echo.html
+
+    var button = document.getElementById("buttonSend"),
+        output = document.querySelector("#output"),
+        textarea = document.querySelector("input"),
+        // wsUri = "ws://echo.websocket.org/",
+        wsUri = "ws://198.251.71.3:7890/EchoAll",
+        websocket = new WebSocket(wsUri);
+
+    button.addEventListener("click", onClickButton);
+
+    websocket.onopen = function (e) {
+        //writeToScreen("CONNECTED");
+        //doSend("WebSocket rocks");
+    };
+
+    websocket.onclose = function (e) {
+        //writeToScreen("DISCONNECTED");
+    };
+
+    websocket.onmessage = function (e) {
+        writeToScreen("<span class=response>" + e.data + "</span>", 0);
+    };
+
+    websocket.onerror = function (e) {
+        writeToScreen("<span class=error>ERROR:</span> " + e.data, 0);
+    };
+
+    function doSend(message) {
+        writeToScreen("<span class=send>" + message + "</span>", 1);
+        websocket.send(message);
+    }
+
+    function writeToScreen(message, type) {
+        if (type == 0) {
+            output.insertAdjacentHTML("beforeend", "<p class=left>" + message + "</p>");
+        } else {
+            output.insertAdjacentHTML("beforeend", "<p class=right>" + message + "</p>");
+        }
+
+        var objDiv = document.getElementById("chat");
+        objDiv.scrollTop = objDiv.scrollHeight;
+    }
+
+    function onClickButton() {
+        var text = textarea.value;
+
+        text && doSend(text);
+        textarea.value = "";
+        textarea.focus();
+    }
+</script>
