@@ -123,17 +123,44 @@
     </div>
 </body>
 
+<!-- script tag goes here -->
+
 <script>
+    let speech = new SpeechSynthesisUtterance();
+    speech.lang = "en";
+
+    let voices = [];
+    window.speechSynthesis.onvoiceschanged = () => {
+      voices = window.speechSynthesis.getVoices();
+      const voiceWoman = voices[129];
+      const voiceMan = voices[130];
+
+      speech.voice = voiceWoman;
+      speech.volume = 1;
+      speech.rate = 1;
+      speech.pitch = 1;
+    };
+
     // http://www.websocket.org/echo.html
 
     var button = document.getElementById("buttonSend"),
         output = document.querySelector("#output"),
         textarea = document.querySelector("input"),
         // wsUri = "ws://echo.websocket.org/",
-        wsUri = "ws://198.251.71.3:7890/EchoAll",
+        wsUri = "ws://198.251.71.3:7890/Echo",
         websocket = new WebSocket(wsUri);
 
     button.addEventListener("click", onClickButton);
+
+    textarea.addEventListener("keypress", function(event) {
+      // If the user presses the "Enter" key on the keyboard
+      if (event.key === "Enter") {
+        // Cancel the default action, if needed
+        event.preventDefault();
+        // Trigger the button element with a click
+        document.getElementById("buttonSend").click();
+      }
+    });
 
     websocket.onopen = function (e) {
         //writeToScreen("CONNECTED");
@@ -145,7 +172,7 @@
     };
 
     websocket.onmessage = function (e) {
-        writeToScreen("<span class=response>" + e.data + "</span>", 0);
+        writeToScreen("<span class=response>" + e.data + "</span>", 0, e.data);
     };
 
     websocket.onerror = function (e) {
@@ -154,12 +181,15 @@
 
     function doSend(message) {
         writeToScreen("<span class=send>" + message + "</span>", 1);
-        websocket.send(message);
+        websocket.send("user|" + message);
     }
 
-    function writeToScreen(message, type) {
+    function writeToScreen(message, type, respuesta) {
         if (type == 0) {
             output.insertAdjacentHTML("beforeend", "<p class=left>" + message + "</p>");
+	// respuesta del server
+	    speech.text = respuesta;
+	    window.speechSynthesis.speak(speech);
         } else {
             output.insertAdjacentHTML("beforeend", "<p class=right>" + message + "</p>");
         }
