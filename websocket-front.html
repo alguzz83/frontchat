@@ -127,7 +127,7 @@
 
 <script>
     let speech = new SpeechSynthesisUtterance();
-    speech.lang = "en";
+    speech.lang = "es";
 
     let voices = [];
     window.speechSynthesis.onvoiceschanged = () => {
@@ -135,7 +135,7 @@
       const voiceWoman = voices[129];
       const voiceMan = voices[130];
 
-      speech.voice = voiceWoman;
+      speech.voice = voiceMan;
       speech.volume = 1;
       speech.rate = 1;
       speech.pitch = 1;
